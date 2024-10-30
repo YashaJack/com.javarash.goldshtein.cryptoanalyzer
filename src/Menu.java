@@ -1,3 +1,4 @@
 public class Menu {
-    sout
-}
+    static {
+    System.out.println("Hello Yasha");
+}}
