@@ -17,15 +17,17 @@ public class FileWorker {
         return Files.lines(path);
     }
 
-    // Метод для записи строки в файл
+    // Метод для записи строки в файл с обработкой ошибок
     public static void writeFile(String filePath, String content) throws IOException {
         try (BufferedWriter writer = Files.newBufferedWriter(Path.of(filePath), StandardOpenOption.CREATE)) {
             writer.write(content);
             writer.newLine();
+        } catch (IOException e) {
+            throw new IOException("Ошибка при записи в файл: " + filePath, e);
         }
     }
 
-    // Метод для записи нескольких строк в файл (например, для больших файлов)
+    // Метод для записи нескольких строк в файл
     public static void writeFile(String filePath, Stream<String> content) throws IOException {
         try (BufferedWriter writer = Files.newBufferedWriter(Path.of(filePath), StandardOpenOption.CREATE)) {
             content.forEach(line -> {
