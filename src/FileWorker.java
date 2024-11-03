@@ -2,37 +2,45 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.stream.Stream;
 
 public class FileWorker {
 
+    // Метод для чтения содержимого файла построчно
+    public static Stream<String> readFile(String filePath) throws IOException {
+        Path path = Path.of(filePath);
+        if (Files.notExists(path)) {
+            throw new IOException("Файл не найден: " + filePath);
+        }
+        return Files.lines(path);
+    }
 
-    public static void encryptFile(String inputFilePath, String outputFilePath, int key) {
-        key = Cipher.validateKey(key);
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(inputFilePath));
-             BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputFilePath), StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                writer.write(Cipher.shiftText(line, key));
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            System.err.println("Ошибка при шифровании файла: " + e.getMessage());
+    // Метод для записи строки в файл
+    public static void writeFile(String filePath, String content) throws IOException {
+        try (BufferedWriter writer = Files.newBufferedWriter(Path.of(filePath), StandardOpenOption.CREATE)) {
+            writer.write(content);
+            writer.newLine();
         }
     }
 
-    public static void decryptFile(String inputFilePath, String outputFilePath, int key) {
-        key = Cipher.validateKey(-key);
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(inputFilePath));
-             BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputFilePath), StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                writer.write(Cipher.shiftText(line, key));
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            System.err.println("Ошибка при дешифровании файла: " + e.getMessage());
+    // Метод для записи нескольких строк в файл (например, для больших файлов)
+    public static void writeFile(String filePath, Stream<String> content) throws IOException {
+        try (BufferedWriter writer = Files.newBufferedWriter(Path.of(filePath), StandardOpenOption.CREATE)) {
+            content.forEach(line -> {
+                try {
+                    writer.write(line);
+                    writer.newLine();
+                } catch (IOException e) {
+                    throw new RuntimeException("Ошибка записи в файл: " + e.getMessage());
+                }
+            });
         }
+    }
+
+    // Проверка существования файла
+    public static boolean fileExists(String filePath) {
+        return Files.exists(Path.of(filePath));
     }
 }

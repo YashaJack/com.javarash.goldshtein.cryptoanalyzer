@@ -1,36 +1,58 @@
-import java.util.HashMap;
-import java.util.Map;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+
+import java.io.IOException;
+import java.util.stream.Stream;
 
 public class Cipher {
-    private static final char[] ALPHABET = {'а', 'б', 'в', 'г', 'д', 'е', 'ж', 'з',
-            'и', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ',
-            'ъ', 'ы', 'ь', 'э', 'я', '.', ',', '«', '»', '"', '\'', ':', '!', '?', ' '};
-
-
+    public static final char[] ALPHABET = {
+            'а', 'б', 'в', 'г', 'д', 'е', 'ж', 'з', 'и', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у',
+            'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'я', '.', ',', '«', '»', '"', '\'', ':', '!', '?', ' '
+    };
     public static final int ALPHABET_SIZE = ALPHABET.length;
-    private static final Map<Character, Integer> ALPHABET_MAP = new HashMap<>();
 
-    static {
-        for (int i = 0; i < ALPHABET_SIZE; i++) {
-            ALPHABET_MAP.put(ALPHABET[i], i);
+    public static void encrypt(String inputFilePath, String outputFilePath, int key) {
+        processFile(inputFilePath, outputFilePath, key, true);
+    }
+
+    public static void decrypt(String inputFilePath, String outputFilePath, int key) {
+        processFile(inputFilePath, outputFilePath, key, false);
+    }
+
+    private static void processFile(String inputFilePath, String outputFilePath, int key, boolean encrypt) {
+        try (Stream<String> lines = FileWorker.readFile(inputFilePath)) {
+            Stream<String> processedLines = lines.map(line -> processLine(line, key, encrypt));
+            FileWorker.writeFile(outputFilePath, processedLines);
+            System.out.println((encrypt ? "Шифрование" : "Расшифровка") + " завершено.");
+        } catch (IOException e) {
+            System.err.println("Ошибка при обработке файла: " + e.getMessage());
         }
     }
 
-    public static String shiftText(String text, int shift) {
-        StringBuilder result = new StringBuilder(); // Используем StringBuilder для эффективного построения строки
-        for (char character : text.toLowerCase().toCharArray()) { // Преобразуем каждый символ в нижний регистр
-            if (ALPHABET_MAP.containsKey(character)) { // Проверка, есть ли символ в алфавите
-                int originalPosition = ALPHABET_MAP.get(character); // Получаем текущую позицию символа
-                int shiftedPosition = (originalPosition + shift + ALPHABET_SIZE) % ALPHABET_SIZE; // Расчет новой позиции
-                result.append(ALPHABET[shiftedPosition]); // Добавляем зашифрованный символ к результату
-            } else {
-                result.append(character); // Если символа нет в алфавите, оставляем его неизменным
+    static String processLine(String line, int key, boolean encrypt) {
+        StringBuilder processedLine = new StringBuilder();
+        for (char c : line.toCharArray()) {
+            int index = findCharIndex(c);
+            if (index != -1) {
+                int shiftedIndex = encrypt ?
+                        (index + key) % ALPHABET_SIZE :
+                        (index - key + ALPHABET_SIZE) % ALPHABET_SIZE;
+                processedLine.append(ALPHABET[shiftedIndex]);
             }
         }
-        return result.toString();
+        return processedLine.toString();
     }
 
-    public static int validateKey(int key) {
-        return (key % ALPHABET_SIZE + ALPHABET_SIZE) % ALPHABET_SIZE;
+    private static int findCharIndex(char c) {
+        for (int i = 0; i < ALPHABET_SIZE; i++) {
+            if (ALPHABET[i] == c) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
