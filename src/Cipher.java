@@ -20,13 +20,13 @@ public class Cipher {
 
     private static void processFile(String inputFilePath, String outputFilePath, int key, boolean encrypt) {
         try (Stream<String> lines = FileWorker.readFile(inputFilePath)) {
-            // Для отрицательного ключа сделаем корректный модуль
+
             int effectiveKey = ((key % ALPHABET_SIZE) + ALPHABET_SIZE) % ALPHABET_SIZE;
 
-            // Если мы расшифровываем, инвертируем сдвиг
+
             effectiveKey = encrypt ? effectiveKey : -effectiveKey;
 
-            // Собираем обработанные строки в список
+
             List<String> processedLines = processLines(lines, effectiveKey);
             FileWorker.writeFile(outputFilePath, processedLines.stream());
             System.out.println((encrypt ? "Шифрование" : "Расшифровка") + " завершено.");
@@ -51,7 +51,7 @@ public class Cipher {
                 int shiftedIndex = (index + key + ALPHABET_SIZE) % ALPHABET_SIZE;
                 processedLine.append(ALPHABET[shiftedIndex]);
             } else {
-                processedLine.append(c);  // Пропускаем символ, если его нет в алфавите
+                processedLine.append(c);
             }
         }
         return processedLine.toString();

@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 public class FileWorker {
 
-    // Метод для чтения содержимого файла построчно
+
     public static Stream<String> readFile(String filePath) throws IOException {
         Path path = Path.of(filePath);
         if (Files.notExists(path)) {
@@ -17,7 +17,7 @@ public class FileWorker {
         return Files.lines(path);
     }
 
-    // Метод для записи строки в файл с обработкой ошибок
+
     public static void writeFile(String filePath, String content) throws IOException {
         try (BufferedWriter writer = Files.newBufferedWriter(Path.of(filePath), StandardOpenOption.CREATE)) {
             writer.write(content);
@@ -27,7 +27,7 @@ public class FileWorker {
         }
     }
 
-    // Метод для записи нескольких строк в файл
+
     public static void writeFile(String filePath, Stream<String> content) throws IOException {
         try (BufferedWriter writer = Files.newBufferedWriter(Path.of(filePath), StandardOpenOption.CREATE)) {
             content.forEach(line -> {
@@ -41,7 +41,7 @@ public class FileWorker {
         }
     }
 
-    // Проверка существования файла
+
     public static boolean fileExists(String filePath) {
         return Files.exists(Path.of(filePath));
     }
